@@ -31,7 +31,7 @@ int main( int argc, char ** argv )
 	if( size < 1 || size > 10485760 )
 	{
 		printf("File size is not within the allowed range\n"); 
-		goto END;
+		return(EXIT_FAILURE);
 	}
 	
 	printf( "File size: %ld MB\n", size/1048576 );
@@ -42,7 +42,7 @@ int main( int argc, char ** argv )
 	if( bytesRead != size )
 	{
 		printf( "Error reading file. Unexpected number of bytes read: %zu\n",bytesRead );
-		goto END;
+		return(EXIT_FAILURE);
 	}
 	
 	// We now have a pointer to the first byte of data in a copy of the file, have fun
@@ -50,7 +50,7 @@ int main( int argc, char ** argv )
 	
 	
 	// Clean up
-END:
+
 	fclose(fp);				// close and free the file
 	exit(EXIT_SUCCESS);		// or return 0;
 }
