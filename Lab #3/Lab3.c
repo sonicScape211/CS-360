@@ -4,6 +4,9 @@
 /*Included for use of exits.*/
 #include <stdlib.h>
 
+#define ONE_MEGABYTE	1048576
+#define MAX_FILE_SIZE	10485760
+
 int main( int argc, char ** argv )
 {
 	// Open the file given on the command line
@@ -28,13 +31,13 @@ int main( int argc, char ** argv )
 	size = ftell(fp);				// how far from the beginning?
 	rewind(fp);						// go back to the beginning
 	
-	if( size < 1 || size > 10485760 )
+	if( size < 1 || size > MAX_FILE_SIZE )
 	{
 		printf("File size is not within the allowed range\n"); 
 		return(EXIT_FAILURE);
 	}
 	
-	printf( "File size: %ld MB\n", size/1048576 );
+	printf( "File size: %.2f MB\n", size/ONE_MEGABYTE);
 	// Allocate memory on the heap for a copy of the file
 	unsigned char * data = (unsigned char *)malloc(size);
 	// Read it into our block of memory
