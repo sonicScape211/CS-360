@@ -19,9 +19,9 @@ typedef struct{
 int findFileSize(FILE * file_pointer)
 {
 	float size = 0;
-	fseek(file_pointer, 0, SEEK_END);
-	size = ftell(file_pointer);
-	rewind(file_pointer);
+	fseek(file_pointer, 0, SEEK_END);	//go from 0 bytes to the end of the file.
+	size = ftell(file_pointer);			//return the amount of bytes traversed.
+	rewind(file_pointer);				//return the pointer to the beginning.
 	
 	//Error checking for the size of the file.
 	if( size < 1 || size > MAX_FILE_SIZE )
@@ -33,6 +33,7 @@ int findFileSize(FILE * file_pointer)
 	return size;
 }
 
+/*Read the file into a block of memory*/
 int readFile(file * myFile)
 {
 	float size = (*myFile).fileSize;
@@ -92,41 +93,8 @@ int main( int argc, char ** argv )
 	
 	readFile(&myFile);
 	
-	// How many bytes are there in the file?  If you know the OS you're
-	// on you can use a system API call to find out.  Here we use ANSI standard
-	// function calls.
-	//float size = 0;
-	//fseek( fp, 0, SEEK_END );		// go to 0 bytes from the end
-	//size = ftell(fp);				// how far from the beginning?
-	//rewind(fp);						// go back to the beginning
-	
-	//if( size < 1 || size > MAX_FILE_SIZE )
-	//{
-		//printf("File size is not within the allowed range\n"); 
-		//return(EXIT_FAILURE);
-	//}
-	
-	//printf( "File size: %.2f MB\n", myFile.fileSize/ONE_MEGABYTE);
-	// Allocate memory on the heap for a copy of the file
-	//unsigned char * data = (unsigned char *)malloc(size);
-	// Read it into our block of memory
-	//size_t bytesRead = fread( data, sizeof(unsigned char), size, fp );
-	//Free data variable. 
-	//free(data);
-	
-	//if( bytesRead != size )
-	//{
-		//printf( "Error reading file. Unexpected number of bytes read: %zu\n",bytesRead );
-		//return(EXIT_FAILURE);
-	//}
-	
-	// We now have a pointer to the first byte of data in a copy of the file, have fun
-	// unsigned char * data    <--- this is the pointer
-	
-	
 	// Clean up
 
-	
 	fclose(myFile.pointerToFile);				// close and free the file
 	exit(EXIT_SUCCESS);		// or return 0;
 }
