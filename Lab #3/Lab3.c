@@ -37,15 +37,15 @@ int findFileSize(FILE * file_pointer)
 size of that file and what bytes it needs to find. This will return only
 the first occurance of this sequence as an unsigned char pointer
 to the first byte.*/
-unsigned char * findHeader(unsigned char * data, size_t fileSize, int byteToFind, int secondNibb)
+unsigned char * findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, unsigned char secondNibb)
 {
 	int i;
 	
 	for(i = 0; i < fileSize; i++)
 	{
-		//Look at the first byte and compare to 255 ie 0xFF and then 
+		//Look at the first byte and compare to 0xFF and then 
 		//increment by one for the next byte, alter byte with 0xF0 (1111 0000)
-		//to see if it compares to 240 (ie 0xF0)
+		//to see if it compares to 0xF0
 		if(data[i] == byteToFind && (data[i+1] & 0xF0) == secondNibb)
 		{
 			printf("found: %02x ", data[i]);
@@ -69,7 +69,7 @@ int readFile(file * myFile)
 	// Read it into our block of memory
 	size_t bytesRead = fread( data, sizeof(unsigned char), size, fp );
 	
-	unsigned char * fileHeaderLocation = findHeader(data, bytesRead, 255, 240);
+	unsigned char * fileHeaderLocation = findHeader(data, bytesRead, 0xFF, 0xF0);
 	
 	printf("\n");
 	//Free data variable. 
