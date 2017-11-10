@@ -44,7 +44,7 @@ int findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, 
 	{
 		/*Consider two case. We find two byte patters, one patter is 0xFF 0xF* 
 		OR the second patter is 0x*F 0xFF*/
-	if((data[i] == 0xFF) && ((data[i+1] & 0xF0) == 0xF0) || ((data[i] & 0x0F) == 0x0F) && (data[i+1] == 0xFF))
+	if((data[i] == 0xFF) && ((data[i+1] & 0xF0) == 0xF0))
 		{
 			printf("found: %02x ", data[i]);
 			printf("%02x \n", data[i+1]);
@@ -54,6 +54,25 @@ int findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, 
 		
 	}
 	return 1; //The method did not find the header. 
+}
+
+findVersion(unsigned char * data, int headerLocation)
+{
+	/*Storage for the next byte in the sequence.
+	This byte will contain the information for the 
+	Version, Layer and Error Protection bits.
+	*/
+	unsigned char nextByte = (data[headerLocation + 1] & 0x0F);
+	
+	if(nextByte == 0x0A || nextByte == 0x0B)
+	{
+		printf("This file is: MPEG Layer 3\n");
+		return 0;
+	}
+	else{
+		printf("This is not MPEG Layer 3\n");
+	}
+	return 1; //The file is not MPEG Layer 3.
 }
 
 /*Read the file into a block of memory*/
@@ -124,13 +143,20 @@ int main( int argc, char ** argv )
 	
 	int fileHeaderLocation = findHeader(data, myFile.fileSize, 0xFF, 0xF0);
 	
-	int i;
+	//If the method comes back false then exit program.
+	//Program requires MPEG Layer 3 to continue.
+	if(findVersion(data, fileHeaderLocation) == 1)
+	{
+		exit(EXIT_FAILURE);
+	};
+	
+	//int i;
 	//Print 6 elements ahead and behind the file header starting point.
-	for(i = (fileHeaderLocation - 6); i <= fileHeaderLocation + 6/*myFile.fileSize*/; i++){
+	//for(i = (fileHeaderLocation - 6); i <= fileHeaderLocation + 6/*myFile.fileSize*/; i++){
 		
-		printf("%02x ", data[i]);
-	}  
-	printf("\n");
+		//printf("%02x ", data[i]);
+	//}  
+	//printf("\n");
 	
 	// Clean up
 	
