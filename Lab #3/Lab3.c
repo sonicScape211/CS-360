@@ -35,22 +35,21 @@ int findFileSize(FILE * file_pointer)
 
 /*Method that takes in a pointer to a memory location for a file, the 
 size of that file and what bytes it needs to find. This will return only
-the first occurance of this sequence as an unsigned char pointer
-to the first byte.*/
-unsigned char * findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, unsigned char secondNibb)
+the index of the first occurance of this sequence.*/
+int findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, unsigned char secondNibb)
 {
 	int i;
 	
 	for(i = 0; i < fileSize; i++)
 	{
-		//Look at the first byte and compare to 0xFF and then 
-		//increment by one for the next byte, alter byte with 0xF0 (1111 0000)
-		//to see if it compares to 0xF0
-		if(data[i] == byteToFind && (data[i+1] & 0xF0) == secondNibb)
+		/*Consider two case. We find two byte patters, one patter is 0xFF 0xF* 
+		OR the second patter is 0x*F 0xFF*/
+	if((data[i] == 0xFF) && ((data[i+1] & 0xF0) == 0xF0) || ((data[i] & 0x0F) == 0x0F) && (data[i+1] == 0xFF))
 		{
 			printf("found: %02x ", data[i]);
-			printf("%02x ", (data[i+1]& 0xF0));
-			return &data[i];
+			printf("%02x \n", data[i+1]);
+			//Return index.
+			return i;
 		}
 		
 	}
@@ -58,7 +57,7 @@ unsigned char * findHeader(unsigned char * data, size_t fileSize, unsigned char 
 }
 
 /*Read the file into a block of memory*/
-int readFile(file * myFile)
+unsigned char * readFile(file * myFile)
 {
 	float size = (*myFile).fileSize;
 	FILE * fp = (*myFile).pointerToFile;
@@ -69,19 +68,21 @@ int readFile(file * myFile)
 	// Read it into our block of memory
 	size_t bytesRead = fread( data, sizeof(unsigned char), size, fp );
 	
-	unsigned char * fileHeaderLocation = findHeader(data, bytesRead, 0xFF, 0xF0);
+	//unsigned char * fileHeaderLocation = findHeader(data, bytesRead, 0xFF, 0xF0);
+	
+	
 	
 	printf("\n");
 	//Free data variable. 
-	free(data);
+	//free(data);
 	
 	if( bytesRead != size )
 	{
 		printf( "Error reading file. Unexpected number of bytes read: %zu\n",bytesRead );
-		return(EXIT_FAILURE);
+		//return(EXIT_FAILURE);
 	}
 	
-	return 0;
+	return data;
 }
 
 /*Function to get the file name and open it.*/
@@ -119,10 +120,21 @@ int main( int argc, char ** argv )
 	//Find and set the size of the file in the struct.
 	myFile.fileSize = findFileSize(myFile.pointerToFile);
 	
-	readFile(&myFile);
+	unsigned char * data = readFile(&myFile);
+	
+	int fileHeaderLocation = findHeader(data, myFile.fileSize, 0xFF, 0xF0);
+	
+	int i;
+	//Print 6 elements ahead and behind the file header starting point.
+	for(i = (fileHeaderLocation - 6); i <= fileHeaderLocation + 6/*myFile.fileSize*/; i++){
+		
+		printf("%02x ", data[i]);
+	}  
+	printf("\n");
 	
 	// Clean up
-
+	
+	free(data);
 	fclose(myFile.pointerToFile);				// close and free the file
 	exit(EXIT_SUCCESS);		// or return 0;
 }
