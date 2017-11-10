@@ -7,6 +7,24 @@
 #define ONE_MEGABYTE	1048576.00
 #define MAX_FILE_SIZE	10485760
 
+int bitRate[14][2]= {
+	{0x10, 32},
+	{0x20, 40},
+	{0x30, 48},
+	{0x40, 56},
+	{0x50, 64},
+	{0x60, 80},
+	{0x70, 96},
+	{0x80, 112},
+	{0x90, 128},
+	{0xA0, 160},
+	{0xB0, 192},
+	{0xC0, 224},
+	{0xD0, 256},
+	{0xE0, 320}
+};
+		
+
 /*Structure for a file object. Will hold 
 a pointer to the referenced file and 
 the size of that file in bytes.*/
@@ -56,7 +74,7 @@ int findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, 
 	return 1; //The method did not find the header. 
 }
 
-findVersion(unsigned char * data, int headerLocation)
+int findVersion(unsigned char * data, int headerLocation)
 {
 	/*Storage for the next byte in the sequence.
 	This byte will contain the information for the 
@@ -73,6 +91,30 @@ findVersion(unsigned char * data, int headerLocation)
 		printf("This is not MPEG Layer 3\n");
 	}
 	return 1; //The file is not MPEG Layer 3.
+}
+
+/*
+This will find the bitRate of a MPEG Layer 3 file by accessing the
+2-d table at the top of the code. Returns the bit rate as an int.
+*/
+int findBitRate(unsigned char * data, int headerLocation)
+{
+	//Get just the upper nibble for the bitRate.
+	unsigned char bitRateByte = (data[headerLocation + 2] & 0xF0);
+	
+	int row = sizeof(bitRate)/sizeof(bitRate[0]);
+	int i;
+	
+	for(i = 0; i < row; i++)
+	{
+
+		if(bitRateByte == bitRate[i][0]){
+			//printf("Bit Rate: %d \n", bitRate[i][1]);
+			return bitRate[i][1];
+		}
+		
+	}
+	return 1; 
 }
 
 /*Read the file into a block of memory*/
@@ -149,6 +191,10 @@ int main( int argc, char ** argv )
 	{
 		exit(EXIT_FAILURE);
 	};
+	
+	int bitRate = findBitRate(data, fileHeaderLocation);
+	
+	printf("Bit Rate data is outside method. %d \n", bitRate);
 	
 	//int i;
 	//Print 6 elements ahead and behind the file header starting point.
