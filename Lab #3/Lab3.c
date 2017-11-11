@@ -23,6 +23,12 @@ int bitRate[14][2]= {
 	{0xD0, 256},
 	{0xE0, 320}
 };
+
+int frequencyRate[3][2] = {
+	{0x00, 44100}, // 0000 0000
+	{0x04, 48000}, // 0000 0100
+	{0x08, 32000}  // 0000 1000 
+};
 		
 
 /*Structure for a file object. Will hold 
@@ -116,6 +122,55 @@ int findBitRate(unsigned char * data, int headerLocation)
 	}
 	return 1; 
 }
+/*
+Locates the frequency rate bits, compares those bits to the 
+frequency array record and outputs the specified rate as an int.
+*/
+int findFrequency(unsigned char * data, int headerLocation)
+{
+	unsigned char frequencyByte = ((data[headerLocation + 2] & 0x0F) & 0x0C);
+	
+	int row = sizeof(frequencyRate)/sizeof(frequencyRate[0]);
+	int i;
+	
+	for(i = 0; i< row; i++){
+		
+		if(frequencyByte == frequencyRate[i][0]){
+			
+			return frequencyRate[i][1];
+		}
+	}
+	return 1;
+}
+
+
+int findCopyRight(unsigned char * data, int headerLocation)
+{
+	unsigned char copyRightByte = ((data[headerLocation + 3] & 0x0F) & 0x08);
+	
+	if(copyRightByte == 0x08)
+	{
+		return 1; //Return true.
+	}
+	else{
+		return 0; //Return false,
+	}
+	
+}
+
+int findCopyOfOriginalBit(unsigned char * data, int headerLocation)
+{
+	unsigned char copyBit = ((data[headerLocation + 3] & 0x0F) & 0x04);
+	
+	if(copyBit == 0x04)
+	{
+		return 1; //return true;
+	}
+	else{
+		return 0; //return false --> This is a original file;
+	}
+	
+}
 
 /*Read the file into a block of memory*/
 unsigned char * readFile(file * myFile)
@@ -145,6 +200,7 @@ unsigned char * readFile(file * myFile)
 	
 	return data;
 }
+
 
 /*Function to get the file name and open it.*/
 int initilize(int argc, char *argv[], file * myFile)
@@ -194,15 +250,32 @@ int main( int argc, char ** argv )
 	
 	int bitRate = findBitRate(data, fileHeaderLocation);
 	
-	printf("Bit Rate data is outside method. %d \n", bitRate);
+	int frequencyRate = findFrequency(data, fileHeaderLocation);
 	
-	//int i;
-	//Print 6 elements ahead and behind the file header starting point.
-	//for(i = (fileHeaderLocation - 6); i <= fileHeaderLocation + 6/*myFile.fileSize*/; i++){
-		
-		//printf("%02x ", data[i]);
-	//}  
-	//printf("\n");
+	int copyRight = findCopyRight(data, fileHeaderLocation);
+	
+	int originalCopy = findCopyOfOriginalBit(data, fileHeaderLocation);
+	
+	printf("Bit Rate: %d kbps.\n", bitRate);
+	
+	printf("Frequency Rate: %d kHz.\n", frequencyRate);
+	
+	if(copyRight == 1)
+	{
+		printf("This file is copyrighted.\n");
+	}
+	else{
+		printf("This file is not copyrighted.\n");
+	}
+	
+	if(originalCopy == 1)
+	{
+		printf("This file is the original copy. \n");
+	}
+	else{
+		printf("This file is copy of original media. \n");
+	}
+	
 	
 	// Clean up
 	
