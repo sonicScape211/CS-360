@@ -70,8 +70,6 @@ int findHeader(unsigned char * data, size_t fileSize, unsigned char byteToFind, 
 		OR the second patter is 0x*F 0xFF*/
 	if((data[i] == 0xFF) && ((data[i+1] & 0xF0) == 0xF0))
 		{
-			printf("found: %02x ", data[i]);
-			printf("%02x \n", data[i+1]);
 			//Return index.
 			return i;
 		}
@@ -183,15 +181,7 @@ unsigned char * readFile(file * myFile)
 	unsigned char * data = (unsigned char *)malloc(size);
 	// Read it into our block of memory
 	size_t bytesRead = fread( data, sizeof(unsigned char), size, fp );
-	
-	//unsigned char * fileHeaderLocation = findHeader(data, bytesRead, 0xFF, 0xF0);
-	
-	
-	
-	printf("\n");
-	//Free data variable. 
-	//free(data);
-	
+		
 	if( bytesRead != size )
 	{
 		printf( "Error reading file. Unexpected number of bytes read: %zu\n",bytesRead );
@@ -240,6 +230,15 @@ int main( int argc, char ** argv )
 	unsigned char * data = readFile(&myFile);
 	
 	int fileHeaderLocation = findHeader(data, myFile.fileSize, 0xFF, 0xF0);
+	
+	
+	printf("File Header(as hex): ");
+	int i;
+	for(i = fileHeaderLocation; i <= fileHeaderLocation + 3; i++){
+		printf("%02x", data[i]);
+	}
+	
+	printf("\n");
 	
 	//If the method comes back false then exit program.
 	//Program requires MPEG Layer 3 to continue.
